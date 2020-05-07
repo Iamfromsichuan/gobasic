@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -84,6 +85,20 @@ func writeFile() {
 	}()
 }
 
+func ioutiltest() {
+	f, _ := os.Open(textPath + "/b/a.txt")
+	b, err := ioutil.ReadAll(f)
+	if err == nil {
+		fmt.Println(string(b))
+		fmt.Println(len(b))
+	}
+}
+
 func main() {
-	ReaderFile()
+	fs, err := ioutil.ReadDir(textPath)
+	if err == nil {
+		for _, n := range fs {
+			fmt.Println(n.Name())
+		}
+	}
 }
