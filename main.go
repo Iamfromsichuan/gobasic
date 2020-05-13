@@ -11,6 +11,7 @@ import (
 )
 
 const textPath string = "/Users/zhangjie/Desktop/selfCode/gobasic/files"
+const FormatString = "2006年01月02日 15:04:05"
 
 func createDir() {
 	err := os.Mkdir(textPath+"/test", os.ModeDir)
@@ -124,13 +125,74 @@ func timeProgram() {
 	t5 := t1.Add(time.Duration(time.Second * 60))
 	// 求时间间隔
 	fmt.Println(t5.Sub(t1))
-	rand.Seed(time.Now().Unix())
+	t6 := time.Now().Unix()
+	rand.Seed(t6)
 	randNum := rand.Intn(10) + 1
 	fmt.Println(randNum)
+
+	t7 := time.Unix(t6, 0)
+	fmt.Println(t7.Format("2006年1月2日 15:04:05"))
+
 	time.Sleep(time.Duration(randNum) * time.Second)
 
 }
 
+func fileProgram() {
+	fileInfo, err := os.Stat("./files/b/a.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//fmt.Println(fileInfo.Sys())
+	// 名称
+	fmt.Println(fileInfo.Name())
+	// 权限
+	fmt.Println(fileInfo.Mode())
+	// 修改时间
+	fmt.Println(fileInfo.ModTime())
+	// 是否为文件夹
+	fmt.Println(fileInfo.IsDir())
+	// 大小，二进制
+	fmt.Println(fileInfo.Size())
+
+	basePath, _ := os.Getwd()
+	// 只能创建一层
+	_ = os.Mkdir(basePath+"/c", os.ModePerm)
+	// 可以创建多层
+	_ = os.MkdirAll(basePath+"/a/b/c", os.ModePerm)
+
+	// 绝对路径创建
+	file, _ := os.Create(basePath + "/c/a.txt")
+	fileInfos, _ := file.Stat()
+	fmt.Println(fileInfos.ModTime().Format(FormatString))
+
+	// 相对路径创建
+	file2, err := os.Create("./c/b.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(file2.Name())
+
+	file3, err := os.Open("./c/b/txt")
+	fmt.Println(file3)
+
+	file4, err := os.OpenFile("./c/a.txt", os.O_RDWR, 0777)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(file4)
+	file4.Write([]byte("说什么呢"))
+
+	// 只能删除空目录和文件
+	err = os.Remove("./c")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
 func main() {
-	timeProgram()
+	fileProgram()
 }
