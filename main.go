@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	_ "gobasic/testInit"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 const textPath string = "/Users/zhangjie/Desktop/selfCode/gobasic/files"
@@ -94,11 +97,40 @@ func ioutiltest() {
 	}
 }
 
+func timeProgram() {
+	t1 := time.Now()
+	fmt.Printf("%T\n", t1)
+
+	s1 := t1.Format("2006年1月2日 15:04:05")
+	fmt.Println(s1)
+
+	s2, _ := time.Parse("2006年01月02日", "1999年10月10日")
+	fmt.Println(s2)
+
+	fmt.Println(t1.String())
+	fmt.Println(t1.Month())
+	fmt.Println(t1.Day())
+	fmt.Println(t1.Minute())
+	fmt.Println(t1.YearDay())
+
+	// 时间戳
+	t4 := time.Date(1970, 1, 1, 1, 0, 0, 0, time.UTC)
+	fmt.Println(t4.Unix())
+	// 当前时间转时间戳
+	fmt.Println(time.Now().Unix())
+	fmt.Println(time.Now().UnixNano())
+	// 加 60s 后
+	fmt.Println(t1)
+	t5 := t1.Add(time.Duration(time.Second * 60))
+	// 求时间间隔
+	fmt.Println(t5.Sub(t1))
+	rand.Seed(time.Now().Unix())
+	randNum := rand.Intn(10) + 1
+	fmt.Println(randNum)
+	time.Sleep(time.Duration(randNum) * time.Second)
+
+}
+
 func main() {
-	fs, err := ioutil.ReadDir(textPath)
-	if err == nil {
-		for _, n := range fs {
-			fmt.Println(n.Name())
-		}
-	}
+	timeProgram()
 }
