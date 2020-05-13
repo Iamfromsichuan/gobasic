@@ -185,14 +185,20 @@ func fileProgram() {
 	fmt.Println(file4)
 	file4.Write([]byte("说什么呢"))
 
-	// 只能删除空目录和文件
+	// 只能删除空目录和文件 rm
 	err = os.Remove("./c")
 	if err != nil {
 		fmt.Println(err)
 	}
+	//  删除全部 rm -rf
+	// os.RemoveAll("")
 
 }
 
+func ioProgram()  {
+	file, err := 
+}
+
 func main() {
-	fileProgram()
+	ioProgram()
 }
