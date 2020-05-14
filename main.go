@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	_ "gobasic/testInit"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -195,10 +196,53 @@ func fileProgram() {
 
 }
 
-func ioProgram()  {
-	file, err := 
+func ioProgram() {
+	basePath, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	file, err := os.OpenFile(basePath+"/files/b/a.txt", os.O_RDWR, 0777)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+	bs := make([]byte, 0, 4)
+	var c []byte
+	for {
+		n, err := file.Read(bs)
+		if err != nil || err == io.EOF {
+			fmt.Println(n)
+			fmt.Println(err)
+			break
+		}
+		c = append(c, bs...)
+		fmt.Println(string(c))
+	}
+
+}
+
+func ioWrite() {
+	basePath, _ := os.Getwd()
+	file, err := os.OpenFile(basePath+"/c/c.txt", os.O_RDWR|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	file.Write([]byte("motorola"))
 }
 
 func main() {
-	ioProgram()
+	ioWrite()
+}
+
+func handleError(err error) bool {
+	if err != nil {
+		println(err)
+		return true
+	}
+	return false
 }
