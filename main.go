@@ -5,14 +5,18 @@ import (
 	_ "gobasic/testInit"
 	"io"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const textPath string = "/Users/zhangjie/Desktop/selfCode/gobasic/files"
 const FormatString = "2006年01月02日 15:04:05"
+
+var RootPath, _ = os.Getwd()
 
 func createDir() {
 	err := os.Mkdir(textPath+"/test", os.ModeDir)
@@ -210,19 +214,24 @@ func ioProgram() {
 	}
 
 	defer file.Close()
-	bs := make([]byte, 0, 4)
+	bs := make([]byte, 32*1024)
 	var c []byte
+	var total = 0
 	for {
 		n, err := file.Read(bs)
-		if err != nil || err == io.EOF {
+		total = total + n
+		if err != nil && err == io.EOF {
 			fmt.Println(n)
 			fmt.Println(err)
 			break
 		}
-		c = append(c, bs...)
+		if n == 0 {
+			break
+		}
+		c = append(c, bs[:n]...)
 		fmt.Println(string(c))
 	}
-
+	fmt.Println(total)
 }
 
 func ioWrite() {
@@ -235,13 +244,105 @@ func ioWrite() {
 	file.Write([]byte("motorola"))
 }
 
+func seekTest() {
+	fileName := RootPath + "/c/a.txt"
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0777)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	bs := []byte{0}
+	file.Read(bs)
+
+	// 从开始位置向后偏移4个字节
+	file.Seek(4, io.SeekStart)
+	file.Read(bs)
+
+	// 从当前光标向后偏移两个位置
+	file.Seek(2, io.SeekCurrent)
+	file.Read(bs)
+
+	// 将光标移动到末尾
+	file.Seek(0, io.SeekEnd)
+	file.Write([]byte("就是最后咯"))
+	fmt.Println(string(bs))
+}
+
+//  c -- 短点续传
+func breakPointerContinue() {
+	fileName := RootPath + "/files/b/a.txt"
+	name := fileName[strings.LastIndex(fileName, "/")+1:]
+	temp := name + "temp.txt"
+	fmt.Println(name, temp)
+
+	file1, err := os.Open(fileName)
+	handleError(err)
+	file2, err := os.OpenFile(RootPath+"/axc.txt", os.O_CREATE|os.O_RDWR, 0777)
+	handleError(err)
+	file3, err := os.OpenFile(RootPath+"/"+temp, os.O_CREATE|os.O_RDWR, 0777)
+	handleError(err)
+
+	defer file2.Close()
+	defer file1.Close()
+
+	file3.Seek(0, io.SeekStart)
+	bs := make([]byte, 100, 100)
+	n1, err := file3.Read(bs)
+	// handleError(err)
+	countStr := string(bs[:n1])
+	count, err := strconv.ParseInt(countStr, 10, 64)
+	// handleError(err)
+	fmt.Println(count)
+
+	file1.Seek(count, io.SeekStart)
+	file2.Seek(count, io.SeekStart)
+
+	data := make([]byte, 1024, 1024)
+	n2 := -1
+	n3 := -1
+	total := int(count)
+
+	for {
+		n2, err = file1.Read(data)
+		if err != nil && err == io.EOF {
+			fmt.Println("读取完毕", total)
+			file3.Close()
+			os.Remove(temp)
+			break
+		}
+		n3, err = file2.Write(data[:n2])
+		total += n3
+
+		file3.Seek(0, io.SeekStart)
+		file3.WriteString(strconv.Itoa(total))
+		fmt.Println(total)
+		//if total > 8000 {
+		//	panic("假装错误")
+		//}
+	}
+}
+
+func chanel() {
+	ch1 := make(chan<- int)
+	//ch2 := make(<- chan int)
+	// ch1 <- 112
+	data := <-ch1
+	//fmt.Println(data)
+	//ch2 <- 22
+}
+
+func senData(chi chan string, done chan bool) {
+	chi <- "四川话"
+	done <- true
+}
+
 func main() {
-	ioWrite()
+	chanel()
 }
 
 func handleError(err error) bool {
 	if err != nil {
-		println(err)
+		fmt.Println(err)
 		return true
 	}
 	return false
